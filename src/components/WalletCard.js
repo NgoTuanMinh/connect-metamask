@@ -1,6 +1,6 @@
 import React, {useState} from 'react'
 import {ethers} from 'ethers'
-import './WalletCard.css'
+import './style.css'
 
 const WalletCard = () => {
 
@@ -58,16 +58,19 @@ const WalletCard = () => {
 	window.ethereum && window.ethereum.on('chainChanged', chainChangedHandler);
 	
 	return (
-		<div className='walletCard'>
-		<h4> {"Connection to MetaMask using window.ethereum methods"} </h4>
-			<button onClick={connectWalletHandler}>{connButtonText}</button>
-			<div className='accountDisplay'>
-				<h3>Address: {defaultAccount}</h3>
-			</div>
-			<div className='balanceDisplay'>
-				<h3>Balance: {userBalance}</h3>
-			</div>
-			{errorMessage}
+		// <div className='walletCard'>
+		// <h4> {"Connection to MetaMask using window.ethereum methods"} </h4>
+		// 	<button onClick={connectWalletHandler}>{connButtonText}</button>
+		// 	<div className='accountDisplay'>
+		// 		<h3>Address: {defaultAccount}</h3>
+		// 	</div>
+		// 	<div className='balanceDisplay'>
+		// 		<h3>Balance: {userBalance}</h3>
+		// 	</div>
+		// 	{errorMessage}
+		// </div>
+		<div>
+			
 		</div>
 	);
 }

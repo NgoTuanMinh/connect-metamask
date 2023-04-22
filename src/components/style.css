@@ -10,5 +10,9 @@
 }
 
 .item-image {
+	
 	padding: 8px;
+}
+.theme {
+	background: black;
 }
