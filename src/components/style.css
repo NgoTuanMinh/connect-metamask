@@ -1,0 +1,18 @@
+.walletCard {
+	margin: 1rem;
+	border: 1px solid black;
+	border-radius: 5px;
+}
+
+.wrap-image {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.item-image {
+	
+	padding: 8px;
+}
+.theme {
+	background: black;
+}
