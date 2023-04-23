@@ -1,77 +1,87 @@
-import * as React from 'react';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import Menu from '@mui/material/Menu';
-import MenuIcon from '@mui/icons-material/Menu';
-import Container from '@mui/material/Container';
-import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import Tooltip from '@mui/material/Tooltip';
-import MenuItem from '@mui/material/MenuItem';
-import AdbIcon from '@mui/icons-material/Adb';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import Stack from '@mui/material/Stack';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import AdbIcon from '@mui/icons-material/Adb';
+import MenuIcon from '@mui/icons-material/Menu';
 import { Grid } from '@mui/material';
+import AppBar from '@mui/material/AppBar';
+import Avatar from '@mui/material/Avatar';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Container from '@mui/material/Container';
+import IconButton from '@mui/material/IconButton';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import ImageListItemBar from '@mui/material/ImageListItemBar';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate, useParams } from 'react-router';
+import Moralis from 'moralis';
+import localStorageHelper from '../utils/localStorage';
 
-const pages = ['HOME', 'NFT VERIFICATION', 'PRESS RELEASe'];
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
-const itemData = [
-    {
-      img: 'https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRcbNhIdOk6YXLL2MT3eXdccNVB-c8uE7nvSxwb9Q0sQLNwa4zs',
-      title: 'BAYC #0000',
-      author: 'Owned by JZ08',
-    },
-    {
-        img: 'https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRcbNhIdOk6YXLL2MT3eXdccNVB-c8uE7nvSxwb9Q0sQLNwa4zs',
-        title: 'BAYC #0000',
-        author: 'Owned by JZ08',
-    },
-    {
-        img: 'https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRcbNhIdOk6YXLL2MT3eXdccNVB-c8uE7nvSxwb9Q0sQLNwa4zs',
-        title: 'BAYC #0000',
-        author: 'Owned by JZ08',
-    },
-    {
-        img: 'https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRcbNhIdOk6YXLL2MT3eXdccNVB-c8uE7nvSxwb9Q0sQLNwa4zs',
-        title: 'BAYC #0000',
-        author: 'Owned by JZ08',
-    },
-    {
-        img: 'https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRcbNhIdOk6YXLL2MT3eXdccNVB-c8uE7nvSxwb9Q0sQLNwa4zs',
-        title: 'BAYC #0000',
-        author: 'Owned by JZ08',
-    },
-    {
-        img: 'https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRcbNhIdOk6YXLL2MT3eXdccNVB-c8uE7nvSxwb9Q0sQLNwa4zs',
-        title: 'BAYC #0000',
-        author: 'Owned by JZ08',
-    },
-  ];
+
+const pages = ['HOME', 'NFT VERIFICATION', 'PRESS RELEASE'];
+
 function NftList() {
-  const [anchorElNav, setAnchorElNav] = React.useState(null);
-  const [anchorElUser, setAnchorElUser] = React.useState(null);
+  const [anchorElNav, setAnchorElNav] = useState(null);
+
+  const [listNfts, setListNfts] = useState([]);
+
+  const { addressMetaMask } = useParams();
+  const navigate = useNavigate();
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
-  };
-  const handleOpenUserMenu = (event) => {
-    setAnchorElUser(event.currentTarget);
   };
 
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
   };
 
-  const handleCloseUserMenu = () => {
-    setAnchorElUser(null);
-  };
+  Moralis.start({
+    apiKey: "Ep0LhOpaddl7vgbe6eGfLlGSQvWMu5gCUPODG6D6YPdpvyRPYrBorvcyfs7FzDfZ"
+  });
+
+  const getNFT = useCallback(async () => {
+		try {
+			const response = await Moralis.EvmApi.nft.getWalletNFTs({
+				"chain": "0x89",
+				"format": "decimal",
+				"tokenAddresses": [],
+				"limit": 10,
+				"mediaItems": true,
+				// "address": defaultAccount,
+				"address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+			});
+
+			setListNfts(response?.raw?.result);
+		
+			// console.log('data=====', response.raw);
+
+      await Moralis.start({
+				apiKey: "Ep0LhOpaddl7vgbe6eGfLlGSQvWMu5gCUPODG6D6YPdpvyRPYrBorvcyfs7FzDfZ"
+			});
+			
+		} catch (e) {
+			console.error(e);
+		}
+	}, []);
+
+  useEffect(() => {
+    if(addressMetaMask){
+      getNFT();
+    };
+  }, [addressMetaMask, getNFT]);
+
+  const listNftsRender = useMemo(() => {
+    const listNftStakedStorage = localStorageHelper.getObject('tokenStaked');
+    if (!listNftStakedStorage) return listNfts;
+
+    const listNftStaked = listNftStakedStorage.filter((i) => i?.addressMetaMask === addressMetaMask).map((j) => j?.tokenHash); 
+    const res = listNfts.filter((i) => !listNftStaked.includes(i?.token_hash));
+    return res;
+  }, [listNfts, addressMetaMask]);
 
   return (
     <div style={{background: 'black'}}>
@@ -79,7 +89,7 @@ function NftList() {
         <Container maxWidth="xl">
           <Toolbar disableGutters>
             <div>
-              <img style={{width:'150px', height:'150px'}}  src="https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcQlBt9laQodEG9vbk903CJl55NOksuOwud6oMd_BIPi6DKHZI2A"/>
+              <img alt='' style={{width:'150px', height:'150px'}}  src="https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcQlBt9laQodEG9vbk903CJl55NOksuOwud6oMd_BIPi6DKHZI2A"/>
             </div>
             <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
               <IconButton
@@ -168,7 +178,7 @@ function NftList() {
             ID: 123456789
           </Typography>
           <Typography sx={{color:'white', pt:1, fontSize:12, display:'inline-flex'}}>
-           <AccountBalanceWalletIcon fontSize='small' sx={{pr:1}}/> Wallet is not connected
+           <AccountBalanceWalletIcon fontSize='small' sx={{pr:1}}/> Wallet is connected
           </Typography>
         </Grid>   
         
@@ -181,43 +191,25 @@ function NftList() {
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam dapibus nunc urna, eu efficitur risus consectetur.
         </Typography>
         <Grid item xs={3} sx={{ pt:5 , pr:5}} >
-        <ImageList cols={10} rowHeight={164}>
-            {itemData.map((item) => (
-                <ImageListItem key={item.img}>
+          <ImageList cols={7} rowHeight={'100%'}>
+            {listNftsRender.map((item, idx) => (
+              <ImageListItem key={idx} style={{cursor: 'pointer'}} onClick={() => navigate(`/staking/${item?.token_hash}`)}>
                 <img
-                    style={{width:"120px"}}
-                    src={item.img}
-                    alt={item.title}
+                    style={{width:"120px", height:'120px', border:'1px solid white', objectFit:'revert'}}
+                    src={item?.media?.original_media_url}
+                    alt={item?.name}
                     loading="lazy"
                 />
                 <ImageListItemBar
                     sx={{color:'white'}}
-                    title={item.title}
-                    subtitle={<span>by: {item.author}</span>}
+                    title={item?.name}
+                    subtitle={<span>by: Owned by JZ08</span>}
                     position="below"
                 />
-                </ImageListItem>
-                
+              </ImageListItem>
             ))}
-            </ImageList>
-        {/* <ImageList cols={3} sx={{ width: 150, height: 150 }}>
-            {itemData.map((item) => (
-                <ImageListItem key={item.img}>
-                <img
-                    src={`${item.img}?w=248&fit=crop&auto=format`}
-                    srcSet={`${item.img}?w=248&fit=crop&auto=format&dpr=2 2x`}
-                    alt={item.title}
-                    loading="lazy"
-                />
-                <ImageListItemBar
-                    title={item.title}
-                    subtitle={<span>by: {item.author}</span>}
-                    position="below"
-                />
-                </ImageListItem>
-            ))}
-            </ImageList> */}
-        </Grid>   
+          </ImageList>
+        </Grid>
       </Grid>  
       
     </div>
